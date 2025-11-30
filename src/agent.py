@@ -198,8 +198,8 @@ Now explain "{topic}" in your unique voice and style. Make it fun and educationa
     }
 
 
-def format_mcp_call(tool_name: str, inputs: dict, output_summary: str) -> str:
-    """Format a tool call in MCP style for display."""
+def format_tool_call(tool_name: str, inputs: dict, output_summary: str) -> str:
+    """Format a tool call for display."""
     import json
     return f"""```json
 {{
@@ -212,16 +212,16 @@ def format_mcp_call(tool_name: str, inputs: dict, output_summary: str) -> str:
 
 
 def run_agent(topic: str, persona_name: str, audience: str = "") -> Generator[dict, None, None]:
-    """Run the full agent pipeline using MCP tool pattern.
+    """Run the full agent pipeline with tool orchestration.
 
     Yields progress updates and final results.
     """
-    # MCP Tool 1: web_search
+    # Tool 1: web_search (DuckDuckGo)
     yield {
         "type": "step",
         "step": "research",
-        "title": "🔧 MCP Tool: `web_search`",
-        "content": format_mcp_call("web_search", {"query": topic, "max_results": 5}, "Searching..."),
+        "title": "🔧 Tool: `web_search`",
+        "content": format_tool_call("web_search", {"query": topic, "max_results": 5}, "Searching..."),
     }
 
     research, sources = research_topic(topic)
@@ -229,20 +229,20 @@ def run_agent(topic: str, persona_name: str, audience: str = "") -> Generator[di
     yield {
         "type": "step",
         "step": "research_done",
-        "title": "✅ Tool Response: `web_search`",
-        "content": format_mcp_call("web_search", {"query": topic}, f"Found {len(sources)} sources"),
+        "title": "✅ Response: `web_search`",
+        "content": format_tool_call("web_search", {"query": topic}, f"Found {len(sources)} sources"),
         "sources": sources,
     }
 
-    # MCP Tool 2: extract_facts
+    # Tool 2: extract_facts
     yield {
         "type": "step",
         "step": "extracting",
-        "title": "🔧 MCP Tool: `extract_facts`",
-        "content": format_mcp_call("extract_facts", {"text": f"[{len(sources)} source documents]", "max_facts": 5}, "Extracting key facts..."),
+        "title": "🔧 Tool: `extract_facts`",
+        "content": format_tool_call("extract_facts", {"text": f"[{len(sources)} source documents]", "max_facts": 5}, "Extracting key facts..."),
     }
 
-    # Step 2: Generate explanation
+    # Generate explanation
     persona = get_persona(persona_name)
 
     # Build audience context
@@ -250,12 +250,12 @@ def run_agent(topic: str, persona_name: str, audience: str = "") -> Generator[di
     if audience and audience.strip():
         audience_context = f"\nYou are explaining this to: {audience.strip()}. Tailor your explanation appropriately for them."
 
-    # MCP Tool 3: persona_transform
+    # Tool 3: persona_transform (Nebius LLM)
     yield {
         "type": "step",
         "step": "generating",
-        "title": "🔧 MCP Tool: `persona_transform`",
-        "content": format_mcp_call(
+        "title": "🔧 Tool: `persona_transform`",
+        "content": format_tool_call(
             "persona_transform",
             {
                 "persona": persona_name,
@@ -293,11 +293,11 @@ Now explain "{topic}" in your unique {persona_name} voice and style. Make it fun
 
     explanation = call_llm(messages)
 
-    # Track MCP tools used in pipeline
+    # Track tools used in pipeline
     mcp_tools = [
-        {"name": "web_search", "icon": "🔍", "desc": "MCP tool for web research via DuckDuckGo"},
-        {"name": "extract_facts", "icon": "📋", "desc": "MCP tool for key fact extraction"},
-        {"name": "persona_transform", "icon": "🎭", "desc": "MCP tool for persona-based explanation (Nebius LLM)"},
+        {"name": "web_search", "icon": "🔍", "desc": "Web research via DuckDuckGo API"},
+        {"name": "extract_facts", "icon": "📋", "desc": "Key fact extraction from sources"},
+        {"name": "persona_transform", "icon": "🎭", "desc": "Persona explanation via Nebius LLM"},
     ]
 
     yield {

@@ -33,14 +33,13 @@ def format_sources(sources: list[dict]) -> str:
 
 
 def format_mcp_tools(tools: list[dict]) -> str:
-    """Format MCP tools used as markdown."""
+    """Format tools used as markdown."""
     if not tools:
         return "*No tools used*"
 
-    md = "**🔌 MCP Tools Invoked:**\n\n"
+    md = "**🔌 Agent Tool Calls:**\n\n"
     for tool in tools:
         md += f"| {tool['icon']} | `{tool['name']}` | {tool['desc']} |\n"
-    md += "\n*All tools follow the Model Context Protocol (MCP) standard*"
     return md
 
 
@@ -106,8 +105,8 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
             with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
                 f.write(audio_bytes)
                 audio_path = f.name
-            # Add text_to_speech MCP tool
-            mcp_tools.append({"name": "text_to_speech", "icon": "🔊", "desc": "MCP tool for audio generation (ElevenLabs)"})
+            # Add text_to_speech tool
+            mcp_tools.append({"name": "text_to_speech", "icon": "🔊", "desc": "Audio generation via ElevenLabs API"})
             progress(1.0, desc="Done!")
         except Exception as e:
             steps_log.append(f"**⚠️ Audio generation failed**\n{str(e)}")
@@ -134,11 +133,11 @@ def create_app():
         gr.Markdown(
             """
             # 🎭 Explainor
-            ### *An MCP-Powered AI Agent*
+            ### *AI Agent with Tool Orchestration*
 
             **Learn anything through the voice of your favorite characters!**
 
-            This agent uses **Model Context Protocol (MCP)** tools to: research your topic,
+            This agent orchestrates multiple tools to: research your topic,
             extract key facts, transform explanations into character voices, and generate audio.
             """
         )
@@ -209,7 +208,7 @@ def create_app():
 
         with gr.Row():
             with gr.Column():
-                with gr.Accordion("🔌 MCP Tool Calls", open=True):
+                with gr.Accordion("🔌 Agent Tool Calls", open=True):
                     mcp_output = gr.Markdown("")
 
         with gr.Row():
@@ -218,7 +217,7 @@ def create_app():
                     sources_output = gr.Markdown("")
 
             with gr.Column():
-                with gr.Accordion("🧠 MCP Execution Trace", open=False):
+                with gr.Accordion("🧠 Execution Trace", open=False):
                     steps_output = gr.Markdown("")
 
         # Example topics
