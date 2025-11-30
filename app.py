@@ -43,15 +43,14 @@ def format_mcp_tools(tools: list[dict]) -> str:
     return md
 
 
-def explain_topic(topic: str, persona_name: str, audience: str = "", generate_audio: bool = False, progress=gr.Progress()):
+def explain_topic(topic: str, persona_name: str, audience: str = "", progress=gr.Progress()):
     """Main function to explain a topic in a persona's voice.
 
-    Returns: (explanation_text, audio_path, sources_md, steps_md, mcp_md)
+    Returns: (explanation_text, sources_md, steps_md, mcp_md)
     """
     if not topic.strip():
         return (
             "Please enter a topic to explain!",
-            None,
             "",
             "❌ No topic provided",
             "",
@@ -63,8 +62,6 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
     steps_log = []
     explanation = ""
     sources = []
-    voice_id = None
-    voice_settings = None
     mcp_tools = []
 
     # Run the agent pipeline
@@ -87,33 +84,11 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
         elif update["type"] == "result":
             explanation = update["explanation"]
             sources = update.get("sources", sources)
-            voice_id = update["voice_id"]
-            voice_settings = update.get("voice_settings")
             mcp_tools = update.get("mcp_tools", [])
-            progress(0.8, desc="Explanation ready!")
+            progress(1.0, desc="Done!")
 
     # Format the steps log
     steps_md = "\n\n---\n\n".join(steps_log)
-
-    # Generate audio only if checkbox is checked
-    audio_path = None
-    if generate_audio and explanation and voice_id:
-        progress(0.9, desc="Generating audio...")
-        try:
-            audio_bytes = generate_speech(explanation, voice_id, voice_settings)
-            # Save to temp file for Gradio
-            with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
-                f.write(audio_bytes)
-                audio_path = f.name
-            # Add text_to_speech tool
-            mcp_tools.append({"name": "text_to_speech", "icon": "🔊", "desc": "Audio generation via ElevenLabs API"})
-            progress(1.0, desc="Done!")
-        except Exception as e:
-            steps_log.append(f"**⚠️ Audio generation failed**\n{str(e)}")
-            steps_md = "\n\n---\n\n".join(steps_log)
-            progress(1.0, desc="Done (no audio)")
-    else:
-        progress(1.0, desc="Done!")
 
     # Format sources
     sources_md = format_sources(sources)
@@ -121,7 +96,38 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
     # Format MCP tools
     mcp_md = format_mcp_tools(mcp_tools)
 
-    return explanation, audio_path, sources_md, steps_md, mcp_md
+    return explanation, sources_md, steps_md, mcp_md
+
+
+def generate_audio(explanation: str, persona_name: str, progress=gr.Progress()):
+    """Generate audio from the explanation text.
+
+    Returns: audio_path
+    """
+    if not explanation or not explanation.strip():
+        return None
+
+    if not persona_name:
+        persona_name = "5-Year-Old"
+
+    # Get persona voice settings
+    persona = get_persona(persona_name)
+    voice_id = persona["voice_id"]
+    voice_settings = persona.get("voice_settings")
+
+    progress(0.3, desc="Generating audio...")
+
+    try:
+        audio_bytes = generate_speech(explanation, voice_id, voice_settings)
+        # Save to temp file for Gradio
+        with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
+            f.write(audio_bytes)
+            audio_path = f.name
+        progress(1.0, desc="Audio ready!")
+        return audio_path
+    except Exception as e:
+        progress(1.0, desc="Audio failed")
+        raise gr.Error(f"Audio generation failed: {str(e)}")
 
 
 # Build the Gradio interface
@@ -196,14 +202,15 @@ def create_app():
                     max_lines=15,
                 )
 
-                audio_checkbox = gr.Checkbox(
-                    label="🔊 Generate audio",
-                    value=False,
+                read_aloud_btn = gr.Button(
+                    "🔊 Read Aloud",
+                    variant="secondary",
+                    size="sm",
                 )
                 audio_output = gr.Audio(
                     label="🔊 Listen to the explanation",
                     type="filepath",
-                    autoplay=False,
+                    autoplay=True,
                 )
 
         with gr.Row():
@@ -246,27 +253,39 @@ def create_app():
             """
         )
 
-        # Event handler
-        def process_and_explain(topic, persona_with_emoji, gen_audio, audience_with_emoji):
+        # Event handler for explanation
+        def process_and_explain(topic, persona_with_emoji, audience_with_emoji):
             # Extract persona name (remove emoji prefix)
             persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
             # Extract audience (remove emoji prefix), skip if "Just me"
             audience = ""
             if audience_with_emoji and "Just me" not in audience_with_emoji:
                 audience = audience_with_emoji.split(" ", 1)[1] if " " in audience_with_emoji else audience_with_emoji
-            return explain_topic(topic, persona_name, audience, gen_audio)
+            return explain_topic(topic, persona_name, audience)
 
         explain_btn.click(
             fn=process_and_explain,
-            inputs=[topic_input, persona_dropdown, audio_checkbox, audience_dropdown],
-            outputs=[explanation_output, audio_output, sources_output, steps_output, mcp_output],
+            inputs=[topic_input, persona_dropdown, audience_dropdown],
+            outputs=[explanation_output, sources_output, steps_output, mcp_output],
         )
 
         # Also trigger on Enter key in topic input
         topic_input.submit(
             fn=process_and_explain,
-            inputs=[topic_input, persona_dropdown, audio_checkbox, audience_dropdown],
-            outputs=[explanation_output, audio_output, sources_output, steps_output, mcp_output],
+            inputs=[topic_input, persona_dropdown, audience_dropdown],
+            outputs=[explanation_output, sources_output, steps_output, mcp_output],
+        )
+
+        # Event handler for audio generation
+        def process_audio(explanation, persona_with_emoji):
+            # Extract persona name (remove emoji prefix)
+            persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
+            return generate_audio(explanation, persona_name)
+
+        read_aloud_btn.click(
+            fn=process_audio,
+            inputs=[explanation_output, persona_dropdown],
+            outputs=[audio_output],
         )
 
     return app
