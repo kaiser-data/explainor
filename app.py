@@ -238,7 +238,6 @@ def create_app():
             explanation_output = gr.Textbox(
                 label="📖 Explanation",
                 lines=6,
-                show_copy_button=True,
             )
 
             # Audio controls in a row
