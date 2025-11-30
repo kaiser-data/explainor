@@ -3,8 +3,7 @@ title: Explainor
 emoji: 🎭
 colorFrom: purple
 colorTo: pink
-sdk: gradio
-sdk_version: 5.0.0
+sdk: docker
 app_file: app.py
 pinned: false
 license: mit

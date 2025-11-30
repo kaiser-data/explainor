@@ -2,4 +2,3 @@ gradio[mcp]>=5.0.0
 elevenlabs>=1.0.0
 httpx>=0.25.0
 python-dotenv>=1.0.0
-huggingface_hub>=0.25.0
