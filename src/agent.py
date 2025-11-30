@@ -95,23 +95,28 @@ def call_llm(messages: list[dict], max_tokens: int = 1500) -> str:
     """Call Nebius LLM API."""
     api_key = get_nebius_client()
 
-    with httpx.Client(timeout=60.0) as client:
-        resp = client.post(
-            f"{NEBIUS_API_BASE}/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json",
-            },
-            json={
-                "model": NEBIUS_MODEL,
-                "messages": messages,
-                "max_tokens": max_tokens,
-                "temperature": 0.8,
-            },
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        return data["choices"][0]["message"]["content"]
+    try:
+        with httpx.Client(timeout=60.0) as client:
+            resp = client.post(
+                f"{NEBIUS_API_BASE}/chat/completions",
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "Content-Type": "application/json",
+                },
+                json={
+                    "model": NEBIUS_MODEL,
+                    "messages": messages,
+                    "max_tokens": max_tokens,
+                    "temperature": 0.8,
+                },
+            )
+            resp.raise_for_status()
+            data = resp.json()
+            return data["choices"][0]["message"]["content"]
+    except httpx.HTTPStatusError as e:
+        raise Exception(f"Nebius API error: {e.response.status_code} - {e.response.text}")
+    except Exception as e:
+        raise Exception(f"LLM call failed: {str(e)}")
 
 
 def research_topic(topic: str) -> tuple[str, list[dict]]:
