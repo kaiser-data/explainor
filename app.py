@@ -140,10 +140,6 @@ def create_app():
                     value=persona_choices[0],
                     label="🎭 Choose your explainer",
                 )
-                audio_checkbox = gr.Checkbox(
-                    label="🔊 Generate audio",
-                    value=False,
-                )
 
         with gr.Row():
             audience_input = gr.Textbox(
@@ -168,6 +164,10 @@ def create_app():
                     max_lines=15,
                 )
 
+                audio_checkbox = gr.Checkbox(
+                    label="🔊 Generate audio",
+                    value=False,
+                )
                 audio_output = gr.Audio(
                     label="🔊 Listen to the explanation",
                     type="filepath",
