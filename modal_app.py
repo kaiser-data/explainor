@@ -109,7 +109,8 @@ def serve():
 
         with gr.Row():
             topic_input = gr.Textbox(label="What do you want to learn about?", placeholder="e.g., Quantum Computing")
-            persona_choices = [f"{PERSONAS[name]['emoji']} {name}" for name in get_persona_names()]
+            # Use simple names without emojis to avoid encoding issues
+            persona_choices = list(get_persona_names())
             persona_dropdown = gr.Dropdown(choices=persona_choices, value=persona_choices[0], label="Choose your explainer")
 
         audience_dropdown = gr.Dropdown(
@@ -131,13 +132,11 @@ def serve():
         with gr.Accordion("Execution Trace", open=False):
             steps_output = gr.Markdown("")
 
-        def process_explain(topic, persona_with_emoji, audience):
-            persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
+        def process_explain(topic, persona_name, audience):
             aud = "" if "Just me" in audience else audience
             return explain_topic(topic, persona_name, aud)
 
-        def process_audio(explanation, persona_with_emoji):
-            persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
+        def process_audio(explanation, persona_name):
             return generate_audio(explanation, persona_name)
 
         explain_btn.click(fn=process_explain, inputs=[topic_input, persona_dropdown, audience_dropdown],
