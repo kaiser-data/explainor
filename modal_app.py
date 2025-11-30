@@ -44,6 +44,9 @@ def serve():
     os.environ["ENABLE_MCP_SERVER"] = "false"
     os.chdir("/app")
 
+    # Debug: Print available env vars (without values)
+    print("Available env vars:", [k for k in os.environ.keys() if 'KEY' in k or 'API' in k or 'NEBIUS' in k or 'ELEVEN' in k])
+
     # Pass environment variables to subprocess
     env = os.environ.copy()
 
@@ -78,23 +81,35 @@ def format_mcp_tools(tools):
     return md
 
 def explain_topic(topic, persona_name, audience=""):
+    import os
+    import traceback
     if not topic.strip():
         return "Please enter a topic!", "", "", ""
     if not persona_name:
         persona_name = "5-Year-Old"
+
+    # Check API key
+    nebius_key = os.getenv("NEBIUS_API_KEY")
+    if not nebius_key:
+        available_keys = [k for k in os.environ.keys() if 'KEY' in k or 'API' in k or 'NEBIUS' in k]
+        return f"Error: NEBIUS_API_KEY not found. Available: {available_keys}", "", "", ""
+
     steps_log = []
     explanation = ""
     sources = []
     mcp_tools = []
-    for update in run_agent(topic, persona_name, audience):
-        if update["type"] == "step":
-            steps_log.append(f"**{update['title']}**\\n{update['content']}")
-            if update["step"] == "research_done" and "sources" in update:
-                sources = update["sources"]
-        elif update["type"] == "result":
-            explanation = update["explanation"]
-            sources = update.get("sources", sources)
-            mcp_tools = update.get("mcp_tools", [])
+    try:
+        for update in run_agent(topic, persona_name, audience):
+            if update["type"] == "step":
+                steps_log.append(f"**{update['title']}**\\n{update['content']}")
+                if update["step"] == "research_done" and "sources" in update:
+                    sources = update["sources"]
+            elif update["type"] == "result":
+                explanation = update["explanation"]
+                sources = update.get("sources", sources)
+                mcp_tools = update.get("mcp_tools", [])
+    except Exception as e:
+        return f"Error: {str(e)}\\n\\n{traceback.format_exc()}", "", "\\n\\n---\\n\\n".join(steps_log), ""
     return explanation, format_sources(sources), "\\n\\n---\\n\\n".join(steps_log), format_mcp_tools(mcp_tools)
 
 def generate_audio(explanation, persona_name):
