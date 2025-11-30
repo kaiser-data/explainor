@@ -244,7 +244,7 @@ def run_agent(topic: str, persona_name: str, audience: str = "") -> Generator[di
 You are explaining a topic to someone. Your explanation should be:
 1. Entertaining and fully in character
 2. Educational - actually explain the concept clearly
-3. MAXIMUM 100 words - be concise!
+3. MAXIMUM 150 words - be concise!
 4. Natural spoken language (will be read aloud)
 5. Engaging and memorable{audience_context}
 
