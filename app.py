@@ -105,39 +105,7 @@ def explain_topic(topic: str, persona_name: str, progress=gr.Progress()):
 def create_app():
     """Create and configure the Gradio app."""
 
-    # Custom CSS for better styling
-    css = """
-    .gradio-container {
-        max-width: 900px !important;
-        margin: auto !important;
-    }
-    .persona-dropdown {
-        font-size: 1.1em !important;
-    }
-    #title-row {
-        text-align: center;
-        margin-bottom: 1rem;
-    }
-    .explanation-box {
-        font-size: 1.15em;
-        line-height: 1.6;
-        padding: 1rem;
-        background: linear-gradient(135deg, #667eea11 0%, #764ba211 100%);
-        border-radius: 10px;
-    }
-    .steps-accordion {
-        font-size: 0.95em;
-    }
-    """
-
-    with gr.Blocks(
-        title="Explainor - AI Persona Explanations",
-        css=css,
-        theme=gr.themes.Soft(
-            primary_hue="violet",
-            secondary_hue="blue",
-        ),
-    ) as app:
+    with gr.Blocks(title="Explainor - AI Persona Explanations") as app:
         # Header
         gr.Markdown(
             """
@@ -147,8 +115,7 @@ def create_app():
 
             Enter any topic and choose a persona. The AI will research your topic,
             transform the explanation into that character's unique voice, and read it aloud.
-            """,
-            elem_id="title-row",
+            """
         )
 
         with gr.Row():
@@ -170,7 +137,6 @@ def create_app():
                     choices=persona_choices,
                     value=persona_choices[0],
                     label="🎭 Choose your explainer",
-                    elem_classes=["persona-dropdown"],
                 )
 
         explain_btn = gr.Button(
@@ -186,8 +152,6 @@ def create_app():
                     label="📖 Explanation",
                     lines=8,
                     max_lines=15,
-                    elem_classes=["explanation-box"],
-                    show_copy_button=True,
                 )
 
                 audio_output = gr.Audio(
@@ -203,10 +167,7 @@ def create_app():
 
             with gr.Column():
                 with gr.Accordion("🧠 Agent Reasoning", open=False):
-                    steps_output = gr.Markdown(
-                        "",
-                        elem_classes=["steps-accordion"],
-                    )
+                    steps_output = gr.Markdown("")
 
         # Example topics
         gr.Examples(
@@ -231,8 +192,7 @@ def create_app():
             Powered by: [Nebius AI](https://nebius.com) (LLM) + [ElevenLabs](https://elevenlabs.io) (TTS)
 
             Made with ❤️ by **kaiser-data**
-            """,
-            elem_id="footer",
+            """
         )
 
         # Event handler
