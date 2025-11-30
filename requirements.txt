@@ -1,0 +1,6 @@
+gradio>=5.0.0
+elevenlabs>=1.0.0
+openai>=1.0.0
+httpx>=0.25.0
+python-dotenv>=1.0.0
+modal>=0.64.0
