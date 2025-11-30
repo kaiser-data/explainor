@@ -32,7 +32,7 @@ def format_sources(sources: list[dict]) -> str:
     return md
 
 
-def explain_topic(topic: str, persona_name: str, audience: str = "", progress=gr.Progress()):
+def explain_topic(topic: str, persona_name: str, audience: str = "", generate_audio: bool = False, progress=gr.Progress()):
     """Main function to explain a topic in a persona's voice.
 
     Returns: (explanation_text, audio_path, sources_md, steps_md)
@@ -79,9 +79,9 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", progress=gr
     # Format the steps log
     steps_md = "\n\n---\n\n".join(steps_log)
 
-    # Generate audio
+    # Generate audio only if checkbox is checked
     audio_path = None
-    if explanation and voice_id:
+    if generate_audio and explanation and voice_id:
         progress(0.9, desc="Generating audio...")
         try:
             audio_bytes = generate_speech(explanation, voice_id)
@@ -94,6 +94,8 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", progress=gr
             steps_log.append(f"**⚠️ Audio generation failed**\n{str(e)}")
             steps_md = "\n\n---\n\n".join(steps_log)
             progress(1.0, desc="Done (no audio)")
+    else:
+        progress(1.0, desc="Done!")
 
     # Format sources
     sources_md = format_sources(sources)
@@ -137,6 +139,10 @@ def create_app():
                     choices=persona_choices,
                     value=persona_choices[0],
                     label="🎭 Choose your explainer",
+                )
+                audio_checkbox = gr.Checkbox(
+                    label="🔊 Generate audio",
+                    value=False,
                 )
 
         with gr.Row():
@@ -204,21 +210,21 @@ def create_app():
         )
 
         # Event handler
-        def process_and_explain(topic, persona_with_emoji, audience):
+        def process_and_explain(topic, persona_with_emoji, gen_audio, audience):
             # Extract persona name (remove emoji prefix)
             persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
-            return explain_topic(topic, persona_name, audience)
+            return explain_topic(topic, persona_name, audience, gen_audio)
 
         explain_btn.click(
             fn=process_and_explain,
-            inputs=[topic_input, persona_dropdown, audience_input],
+            inputs=[topic_input, persona_dropdown, audio_checkbox, audience_input],
             outputs=[explanation_output, audio_output, sources_output, steps_output],
         )
 
         # Also trigger on Enter key in topic input
         topic_input.submit(
             fn=process_and_explain,
-            inputs=[topic_input, persona_dropdown, audience_input],
+            inputs=[topic_input, persona_dropdown, audio_checkbox, audience_input],
             outputs=[explanation_output, audio_output, sources_output, steps_output],
         )
 
