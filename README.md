@@ -93,8 +93,7 @@ https://agents-mcp-hackathon-explainor.hf.space/gradio_api/mcp/sse
 *Coming soon*
 
 ### 📱 Social Post
-<!-- TODO: Add social media post link -->
-*Coming soon*
+[LinkedIn Post](https://www.linkedin.com/posts/activity-7401046415172444160-TDL7)
 
 ## 📝 License
 
