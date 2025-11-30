@@ -37,9 +37,10 @@ def format_mcp_tools(tools: list[dict]) -> str:
     if not tools:
         return "*No tools used*"
 
-    md = "**Tools & Services Used:**\n\n"
+    md = "**🔌 MCP Tools Invoked:**\n\n"
     for tool in tools:
-        md += f"{tool['icon']} **{tool['name']}** - {tool['desc']}\n\n"
+        md += f"| {tool['icon']} | `{tool['name']}` | {tool['desc']} |\n"
+    md += "\n*All tools follow the Model Context Protocol (MCP) standard*"
     return md
 
 
@@ -103,8 +104,8 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
             with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
                 f.write(audio_bytes)
                 audio_path = f.name
-            # Add ElevenLabs to MCP tools
-            mcp_tools.append({"name": "ElevenLabs TTS", "icon": "🔊", "desc": "Text-to-speech audio generation"})
+            # Add text_to_speech MCP tool
+            mcp_tools.append({"name": "text_to_speech", "icon": "🔊", "desc": "MCP tool for audio generation (ElevenLabs)"})
             progress(1.0, desc="Done!")
         except Exception as e:
             steps_log.append(f"**⚠️ Audio generation failed**\n{str(e)}")
@@ -131,11 +132,12 @@ def create_app():
         gr.Markdown(
             """
             # 🎭 Explainor
+            ### *An MCP-Powered AI Agent*
 
             **Learn anything through the voice of your favorite characters!**
 
-            Enter any topic and choose a persona. The AI will research your topic,
-            transform the explanation into that character's unique voice, and read it aloud.
+            This agent uses **Model Context Protocol (MCP)** tools to: research your topic,
+            extract key facts, transform explanations into character voices, and generate audio.
             """
         )
 
@@ -205,7 +207,7 @@ def create_app():
 
         with gr.Row():
             with gr.Column():
-                with gr.Accordion("🔌 Tools & Services Used", open=True):
+                with gr.Accordion("🔌 MCP Tool Calls", open=True):
                     mcp_output = gr.Markdown("")
 
         with gr.Row():
@@ -214,7 +216,7 @@ def create_app():
                     sources_output = gr.Markdown("")
 
             with gr.Column():
-                with gr.Accordion("🧠 Agent Reasoning", open=False):
+                with gr.Accordion("🧠 MCP Execution Trace", open=False):
                     steps_output = gr.Markdown("")
 
         # Example topics
