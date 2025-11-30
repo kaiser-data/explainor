@@ -38,6 +38,9 @@ def serve():
     """Serve the Gradio app via web_server."""
     import subprocess
     import os
+
+    # Disable MCP server on Modal (causes issues)
+    os.environ["ENABLE_MCP_SERVER"] = "false"
     os.chdir("/app")
     subprocess.Popen(["python", "app.py"])
 

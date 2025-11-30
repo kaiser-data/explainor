@@ -315,10 +315,13 @@ input::placeholder, textarea::placeholder {
 """
 
 if __name__ == "__main__":
+    # MCP server only works locally, not on Modal
+    enable_mcp = os.getenv("ENABLE_MCP_SERVER", "true").lower() == "true"
+
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
         share=False,
         css=CUSTOM_CSS,
-        mcp_server=True,  # Enable MCP server - exposes this app as an MCP tool!
+        mcp_server=enable_mcp,
     )
