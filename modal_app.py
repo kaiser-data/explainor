@@ -31,17 +31,15 @@ image = (
         modal.Secret.from_name("elevenlabs-api-key"),
     ],
     timeout=600,
+    container_idle_timeout=300,
 )
-@modal.concurrent(max_inputs=100)
-@modal.asgi_app()
+@modal.web_server(port=7860, startup_timeout=120)
 def serve():
-    """Serve the Gradio app as ASGI."""
-    import sys
-    sys.path.insert(0, "/app")
-
-    from app import create_app
-    gradio_app = create_app()
-    return gradio_app
+    """Serve the Gradio app via web_server."""
+    import subprocess
+    import os
+    os.chdir("/app")
+    subprocess.Popen(["python", "app.py"])
 
 
 # For local testing
