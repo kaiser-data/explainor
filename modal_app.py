@@ -14,13 +14,13 @@ app = modal.App("explainor")
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
-        "gradio>=5.0.0",
+        "gradio[mcp]>=5.0.0",
         "elevenlabs>=1.0.0",
         "httpx>=0.25.0",
         "python-dotenv>=1.0.0",
     )
-    .copy_local_dir("src", "/app/src")
-    .copy_local_file("app.py", "/app/app.py")
+    .add_local_dir("src", remote_path="/app/src", copy=True)
+    .add_local_file("app.py", remote_path="/app/app.py", copy=True)
 )
 
 
