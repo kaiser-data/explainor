@@ -1,3 +1,17 @@
+---
+title: Explainor
+emoji: 🎭
+colorFrom: purple
+colorTo: orange
+sdk: gradio
+sdk_version: 5.0.0
+app_file: app.py
+pinned: false
+license: mit
+tags:
+  - mcp-in-action-track-creative
+---
+
 # 🎭 Explainor
 
 > **Learn anything through the voice of your favorite characters!**
@@ -5,8 +19,6 @@
 [![MCP Hackathon](https://img.shields.io/badge/MCP%20Hackathon-1st%20Birthday-purple)](https://huggingface.co/MCP-1st-Birthday)
 [![Track](https://img.shields.io/badge/Track-MCP%20in%20Action-blue)](https://huggingface.co/MCP-1st-Birthday)
 [![Category](https://img.shields.io/badge/Category-Creative-green)](https://huggingface.co/MCP-1st-Birthday)
-
-**Tags:** `mcp-in-action-track-creative`
 
 ---
 
@@ -22,10 +34,6 @@ Explainor is an AI agent that takes any topic you want to learn about and explai
 | 🎭 **Shakespeare** | Dramatic, old English, theatrical |
 | 🏄 **Surfer Dude** | "Brooo", chill vibes, wave metaphors |
 | 🧙 **Yoda** | Inverted syntax, wise, Force references |
-
-## 🎬 Demo
-
-[Demo Video Placeholder]
 
 ## 🛠️ How It Works
 
@@ -48,94 +56,13 @@ Make the explanation even more tailored by choosing your audience:
 | 👵 My confused grandmother | Extra simple, patient |
 | 🤖 A skeptical robot | Logical, evidence-based |
 | 👽 An alien visiting Earth | Explain Earth concepts |
-| 🧟 A zombie | Very short, simple words |
-| 🦊 A very smart fox | Clever, quick |
-| 👔 A stressed CEO | Bottom-line focused |
-| 🎮 A distracted gamer | Keep it engaging |
-
-## 🔌 MCP Server Integration
-
-This app is a **real MCP server**! When running, it exposes its functionality as tools that other AI agents can call via the Model Context Protocol.
-
-**MCP Endpoint:** `http://localhost:7860/gradio_api/mcp/`
-
-This means:
-- Other AI agents can use Explainor as a tool
-- Enables agent-to-agent communication
-- Part of the growing MCP ecosystem
 
 ## 🚀 Tech Stack
 
-- **MCP**: Model Context Protocol - App exposes itself as an MCP server
 - **LLM**: [Nebius AI](https://nebius.com) - Llama 3.3 70B for intelligent explanations
 - **TTS**: [ElevenLabs](https://elevenlabs.io) - Realistic voice synthesis with character-matched voices
 - **Web Search**: DuckDuckGo API for topic research
 - **Frontend**: [Gradio](https://gradio.app) with MCP integration
-- **Deployment**: [Modal](https://modal.com) - Serverless infrastructure
-
-## 💻 Local Development
-
-### Prerequisites
-
-- Python 3.11+
-- Nebius API key
-- ElevenLabs API key
-
-### Setup
-
-```bash
-# Clone the repository
-git clone https://huggingface.co/spaces/MCP-1st-Birthday/explainor
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Set up environment variables
-cp .env.example .env
-# Edit .env with your API keys
-
-# Run locally
-python app.py
-```
-
-### Environment Variables
-
-```bash
-NEBIUS_API_KEY=your_nebius_api_key_here
-ELEVENLABS_API_KEY=your_elevenlabs_api_key_here
-```
-
-## 🌐 Deployment
-
-### Modal Deployment
-
-```bash
-# Set up Modal secrets
-modal secret create nebius-api-key NEBIUS_API_KEY=your_key
-modal secret create elevenlabs-api-key ELEVENLABS_API_KEY=your_key
-
-# Deploy
-modal deploy modal_app.py
-```
-
-### Hugging Face Spaces
-
-This app is designed to run on Hugging Face Spaces with the Gradio SDK.
-
-## 📁 Project Structure
-
-```
-explainor/
-├── app.py              # Main Gradio application
-├── modal_app.py        # Modal deployment config
-├── requirements.txt    # Python dependencies
-├── src/
-│   ├── __init__.py
-│   ├── personas.py     # Persona definitions & voice mappings
-│   ├── agent.py        # Agent logic & web search
-│   └── tts.py          # ElevenLabs integration
-└── README.md
-```
 
 ## 🏆 Hackathon Submission
 
