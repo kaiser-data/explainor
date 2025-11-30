@@ -228,9 +228,30 @@ def create_app():
 # Create the app
 app = create_app()
 
+CUSTOM_CSS = """
+/* Fix dark mode input visibility */
+input, textarea, select {
+    color: var(--body-text-color) !important;
+    background-color: var(--input-background-fill) !important;
+}
+
+input:hover, textarea:hover, select:hover,
+input:focus, textarea:focus, select:focus {
+    color: var(--body-text-color) !important;
+    background-color: var(--input-background-fill) !important;
+}
+
+/* Ensure placeholder is visible */
+input::placeholder, textarea::placeholder {
+    color: var(--body-text-color-subdued) !important;
+    opacity: 0.7;
+}
+"""
+
 if __name__ == "__main__":
     app.launch(
         server_name="0.0.0.0",
         server_port=7860,
         share=False,
+        css=CUSTOM_CSS,
     )
