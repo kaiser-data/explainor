@@ -2,7 +2,7 @@
 title: Explainor
 emoji: 🎭
 colorFrom: purple
-colorTo: orange
+colorTo: pink
 sdk: gradio
 sdk_version: 5.0.0
 app_file: app.py
