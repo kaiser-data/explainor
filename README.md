@@ -3,10 +3,12 @@ title: Explainor
 emoji: 🎭
 colorFrom: purple
 colorTo: pink
-sdk: docker
+sdk: gradio
+sdk_version: 6.0.1
 app_file: app.py
 pinned: false
 license: mit
+short_description: AI agent explains topics in fun character voices with MCP
 tags:
   - mcp-in-action-track-creative
 ---
