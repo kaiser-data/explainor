@@ -65,6 +65,7 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
     explanation = ""
     sources = []
     voice_id = None
+    voice_settings = None
     mcp_tools = []
 
     # Run the agent pipeline
@@ -88,6 +89,7 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
             explanation = update["explanation"]
             sources = update.get("sources", sources)
             voice_id = update["voice_id"]
+            voice_settings = update.get("voice_settings")
             mcp_tools = update.get("mcp_tools", [])
             progress(0.8, desc="Explanation ready!")
 
@@ -99,7 +101,7 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
     if generate_audio and explanation and voice_id:
         progress(0.9, desc="Generating audio...")
         try:
-            audio_bytes = generate_speech(explanation, voice_id)
+            audio_bytes = generate_speech(explanation, voice_id, voice_settings)
             # Save to temp file for Gradio
             with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
                 f.write(audio_bytes)

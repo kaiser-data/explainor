@@ -1,7 +1,7 @@
 """ElevenLabs Text-to-Speech integration."""
 
 import os
-from elevenlabs import ElevenLabs
+from elevenlabs import ElevenLabs, VoiceSettings
 
 
 def get_client() -> ElevenLabs:
@@ -12,25 +12,40 @@ def get_client() -> ElevenLabs:
     return ElevenLabs(api_key=api_key)
 
 
-def generate_speech(text: str, voice_id: str) -> bytes:
+def generate_speech(text: str, voice_id: str, voice_settings: dict = None) -> bytes:
     """Generate speech audio from text.
 
     Args:
         text: The text to convert to speech
         voice_id: ElevenLabs voice ID
+        voice_settings: Optional dict with stability, similarity_boost, style, speed
 
     Returns:
         Audio bytes (MP3 format)
     """
     client = get_client()
 
+    # Build voice settings if provided
+    settings = None
+    if voice_settings:
+        settings = VoiceSettings(
+            stability=voice_settings.get("stability", 0.5),
+            similarity_boost=voice_settings.get("similarity_boost", 0.75),
+            style=voice_settings.get("style", 0.0),
+            speed=voice_settings.get("speed", 1.0),
+        )
+
     # Generate audio
-    audio_generator = client.text_to_speech.convert(
-        voice_id=voice_id,
-        text=text,
-        model_id="eleven_multilingual_v2",
-        output_format="mp3_44100_128",
-    )
+    kwargs = {
+        "voice_id": voice_id,
+        "text": text,
+        "model_id": "eleven_multilingual_v2",
+        "output_format": "mp3_44100_128",
+    }
+    if settings:
+        kwargs["voice_settings"] = settings
+
+    audio_generator = client.text_to_speech.convert(**kwargs)
 
     # Collect all audio chunks
     audio_chunks = []

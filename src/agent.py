@@ -307,5 +307,6 @@ Now explain "{topic}" in your unique {persona_name} voice and style. Make it fun
         "persona": persona_name,
         "persona_emoji": persona["emoji"],
         "voice_id": persona["voice_id"],
+        "voice_settings": persona.get("voice_settings"),
         "mcp_tools": mcp_tools,
     }
