@@ -7,13 +7,13 @@ Run locally: modal serve modal_app.py
 import modal
 
 # Define the Modal app
-app = modal.App("explainor-v5")
+app = modal.App("explainor-v6")
 
 # Create image with dependencies
 image = (
     modal.Image.debian_slim(python_version="3.11")
     .pip_install(
-        "gradio>=5.0.0",
+        "gradio==4.44.1",  # Use older stable version without aggressive SSE
         "elevenlabs>=1.0.0",
         "httpx>=0.25.0",
         "python-dotenv>=1.0.0",
