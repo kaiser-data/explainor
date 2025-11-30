@@ -7,7 +7,7 @@ Run locally: modal serve modal_app.py
 import modal
 
 # Define the Modal app
-app = modal.App("explainor-v3")
+app = modal.App("explainor-v4")
 
 # Create image with dependencies
 image = (
@@ -17,6 +17,7 @@ image = (
         "elevenlabs>=1.0.0",
         "httpx>=0.25.0",
         "python-dotenv>=1.0.0",
+        "fastapi",
     )
     .add_local_dir("src", remote_path="/app/src", copy=True)
 )
@@ -40,6 +41,7 @@ def serve():
     import os
     import tempfile
     import gradio as gr
+    from fastapi import FastAPI
     from src.personas import get_persona_names, get_persona
     from src.agent import run_agent
     from src.tts import generate_speech
@@ -147,8 +149,10 @@ def serve():
             outputs=[audio_output],
         )
 
-    # Use Gradio's queue with specific settings for Modal
-    demo.queue(default_concurrency_limit=5)
+    # Create FastAPI app and mount Gradio
+    fastapi_app = FastAPI()
 
-    # Return the ASGI app
-    return demo.app
+    # Mount Gradio app
+    fastapi_app = gr.mount_gradio_app(fastapi_app, demo, path="/")
+
+    return fastapi_app
