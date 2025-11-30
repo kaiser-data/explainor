@@ -8,7 +8,7 @@ import os
 import modal
 
 # Define the Modal app
-app = modal.App("explainor")
+app = modal.App("explainor-v2")
 
 # Create image with dependencies
 image = (
