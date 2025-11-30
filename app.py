@@ -18,30 +18,59 @@ from src.tts import generate_speech
 load_dotenv()
 
 
-# Custom CSS for dark mode input visibility
+# Custom CSS for better styling
 CUSTOM_CSS = """
-/* Fix dark mode input visibility */
-input, textarea, select {
-    color: var(--body-text-color) !important;
-    background-color: var(--input-background-fill) !important;
-}
-
-input:hover, textarea:hover, select:hover,
-input:focus, textarea:focus, select:focus {
-    color: var(--body-text-color) !important;
-    background-color: var(--input-background-fill) !important;
-}
-
-/* Ensure placeholder is visible */
-input::placeholder, textarea::placeholder {
-    color: var(--body-text-color-subdued) !important;
-    opacity: 0.7;
-}
-
-/* Force dark background on inputs */
+/* Dark mode input fix */
 .dark input, .dark textarea {
     background-color: #374151 !important;
     color: #ffffff !important;
+}
+
+/* Header styling */
+.header-container {
+    text-align: center;
+    padding: 1rem 0;
+}
+
+/* Card-like sections */
+.input-section, .output-section {
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+/* Primary button enhancement */
+.primary-btn {
+    font-size: 1.1rem !important;
+    padding: 0.75rem 2rem !important;
+}
+
+/* Audio section layout */
+.audio-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* Persona cards in examples */
+.example-row {
+    margin-top: 0.5rem;
+}
+
+/* Footer styling */
+.footer {
+    text-align: center;
+    opacity: 0.8;
+    font-size: 0.9rem;
+}
+
+/* MCP badge */
+.mcp-badge {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    display: inline-block;
+    font-weight: bold;
 }
 """
 
@@ -61,28 +90,20 @@ def format_sources(sources: list[dict]) -> str:
 
 
 def format_mcp_tools(tools: list[dict]) -> str:
-    """Format tools used as markdown."""
+    """Format tools used as markdown table."""
     if not tools:
-        return "*No tools used*"
+        return "*Waiting for explanation...*"
 
-    md = "**🔌 Agent Tool Calls:**\n\n"
+    md = "| Tool | Description |\n|------|-------------|\n"
     for tool in tools:
-        md += f"| {tool['icon']} | `{tool['name']}` | {tool['desc']} |\n"
+        md += f"| {tool['icon']} `{tool['name']}` | {tool['desc']} |\n"
     return md
 
 
 def explain_topic(topic: str, persona_name: str, audience: str = "", progress=gr.Progress()):
-    """Main function to explain a topic in a persona's voice.
-
-    Returns: (explanation_text, sources_md, steps_md, mcp_md)
-    """
+    """Main function to explain a topic in a persona's voice."""
     if not topic.strip():
-        return (
-            "Please enter a topic to explain!",
-            "",
-            "❌ No topic provided",
-            "",
-        )
+        return "Please enter a topic to explain!", "", "", ""
 
     if not persona_name:
         persona_name = "5-Year-Old"
@@ -92,7 +113,6 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", progress=gr
     sources = []
     mcp_tools = []
 
-    # Run the agent pipeline
     progress(0, desc="Starting...")
 
     for update in run_agent(topic, persona_name, audience):
@@ -101,229 +121,220 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", progress=gr
             steps_log.append(step_text)
 
             if update["step"] == "research":
-                progress(0.2, desc="Researching...")
+                progress(0.2, desc="🔍 Researching...")
             elif update["step"] == "research_done":
-                progress(0.4, desc="Research complete")
+                progress(0.4, desc="📚 Research complete")
                 if "sources" in update:
                     sources = update["sources"]
             elif update["step"] == "generating":
-                progress(0.6, desc="Generating explanation...")
+                progress(0.6, desc="🎭 Generating explanation...")
 
         elif update["type"] == "result":
             explanation = update["explanation"]
             sources = update.get("sources", sources)
             mcp_tools = update.get("mcp_tools", [])
-            progress(1.0, desc="Done!")
+            progress(1.0, desc="✅ Done!")
 
-    # Format the steps log
     steps_md = "\n\n---\n\n".join(steps_log)
-
-    # Format sources
     sources_md = format_sources(sources)
-
-    # Format MCP tools
     mcp_md = format_mcp_tools(mcp_tools)
 
     return explanation, sources_md, steps_md, mcp_md
 
 
 def generate_audio(explanation: str, persona_name: str, progress=gr.Progress()):
-    """Generate audio from the explanation text.
-
-    Returns: audio_path
-    """
+    """Generate audio from the explanation text."""
     if not explanation or not explanation.strip():
         return None
 
     if not persona_name:
         persona_name = "5-Year-Old"
 
-    # Get persona voice settings
     persona = get_persona(persona_name)
     voice_id = persona["voice_id"]
     voice_settings = persona.get("voice_settings")
 
-    progress(0.3, desc="Generating audio...")
+    progress(0.3, desc="🔊 Generating audio...")
 
     try:
         audio_bytes = generate_speech(explanation, voice_id, voice_settings)
-        # Save to temp file for Gradio
         with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
             f.write(audio_bytes)
             audio_path = f.name
-        progress(1.0, desc="Audio ready!")
+        progress(1.0, desc="✅ Audio ready!")
         return audio_path
     except Exception as e:
-        progress(1.0, desc="Audio failed")
+        progress(1.0, desc="❌ Audio failed")
         raise gr.Error(f"Audio generation failed: {str(e)}")
 
 
-# Build the Gradio interface
 def create_app():
     """Create and configure the Gradio app."""
 
-    with gr.Blocks(title="Explainor - AI Persona Explanations") as app:
-        # Header
+    # Build persona choices
+    persona_choices = [
+        f"{PERSONAS[name]['emoji']} {name}"
+        for name in get_persona_names()
+    ]
+
+    # Audience choices
+    audience_choices = [
+        "👤 Just me",
+        "👵 Confused grandmother",
+        "🤖 Skeptical robot",
+        "👽 Alien visitor",
+        "🧟 Zombie",
+        "👔 Stressed CEO",
+    ]
+
+    with gr.Blocks(title="Explainor", fill_width=True) as app:
+
+        # ===== HEADER =====
         gr.Markdown(
             """
-            # 🎭 Explainor
-            ### *AI Agent with Tool Orchestration*
-
-            **Learn anything through the voice of your favorite characters!**
-
-            This agent orchestrates multiple tools to: research your topic,
-            extract key facts, transform explanations into character voices, and generate audio.
-            """
+            <div style="text-align: center; padding: 1rem 0;">
+                <h1>🎭 Explainor</h1>
+                <p style="font-size: 1.2rem; opacity: 0.9;">Learn anything through the voice of your favorite characters!</p>
+            </div>
+            """,
+            elem_classes=["header-container"]
         )
 
-        with gr.Row():
-            with gr.Column(scale=2):
-                topic_input = gr.Textbox(
-                    label="📝 What do you want to learn about?",
-                    placeholder="e.g., Blockchain, Photosynthesis, Black Holes...",
-                    lines=1,
-                    max_lines=1,
-                )
+        # ===== INPUT SECTION =====
+        with gr.Group():
+            # Topic input - full width, prominent
+            topic_input = gr.Textbox(
+                label="What do you want to learn about?",
+                placeholder="Try: Quantum Computing, Blockchain, Black Holes, Climate Change...",
+                lines=1,
+                scale=2,
+            )
 
-            with gr.Column(scale=1):
-                # Build persona choices with emojis
-                persona_choices = [
-                    f"{PERSONAS[name]['emoji']} {name}"
-                    for name in get_persona_names()
-                ]
+            # Persona and Audience in one row
+            with gr.Row():
                 persona_dropdown = gr.Dropdown(
                     choices=persona_choices,
                     value=persona_choices[0],
-                    label="🎭 Choose your explainer",
+                    label="🎭 Explainer",
+                    scale=1,
+                )
+                audience_dropdown = gr.Dropdown(
+                    choices=audience_choices,
+                    value=audience_choices[0],
+                    label="👤 Audience",
+                    scale=1,
                 )
 
-        with gr.Row():
-            # Funny listener options (don't overlap with personas)
-            listener_choices = [
-                "👤 Just me",
-                "👵 My confused grandmother",
-                "🤖 A skeptical robot",
-                "👽 An alien visiting Earth",
-                "🧟 A zombie (short attention span)",
-                "🦊 A very smart fox",
-                "👔 A stressed CEO",
-                "🎮 A distracted gamer",
-            ]
-            audience_dropdown = gr.Dropdown(
-                choices=listener_choices,
-                value=listener_choices[0],
-                label="👤 Who's listening?",
-            )
-
+        # ===== ACTION BUTTON =====
         explain_btn = gr.Button(
             "✨ Explain it to me!",
             variant="primary",
             size="lg",
+            elem_classes=["primary-btn"],
         )
 
-        # Output section
-        with gr.Row():
-            with gr.Column():
-                explanation_output = gr.Textbox(
-                    label="📖 Explanation",
-                    lines=8,
-                    max_lines=15,
-                )
+        # ===== OUTPUT SECTION =====
+        with gr.Group():
+            explanation_output = gr.Textbox(
+                label="📖 Explanation",
+                lines=6,
+                show_copy_button=True,
+            )
 
+            # Audio controls in a row
+            with gr.Row():
                 read_aloud_btn = gr.Button(
                     "🔊 Read Aloud",
                     variant="secondary",
-                    size="sm",
+                    scale=1,
                 )
                 audio_output = gr.Audio(
-                    label="🔊 Listen to the explanation",
+                    label="Listen",
                     type="filepath",
                     autoplay=True,
+                    scale=3,
                 )
 
-        with gr.Row():
-            with gr.Column():
-                with gr.Accordion("🔌 Agent Tool Calls", open=True):
-                    mcp_output = gr.Markdown("")
+        # ===== DETAILS SECTION (Tabs) =====
+        with gr.Accordion("📊 Details", open=False):
+            with gr.Tabs():
+                with gr.TabItem("🔧 Agent Tools"):
+                    mcp_output = gr.Markdown("*Run an explanation to see tool calls*")
 
-        with gr.Row():
-            with gr.Column():
-                with gr.Accordion("🔍 Sources", open=False):
-                    sources_output = gr.Markdown("")
+                with gr.TabItem("📚 Sources"):
+                    sources_output = gr.Markdown("*Sources will appear here*")
 
-            with gr.Column():
-                with gr.Accordion("🧠 Execution Trace", open=False):
-                    steps_output = gr.Markdown("")
+                with gr.TabItem("🔍 Trace"):
+                    steps_output = gr.Markdown("*Execution trace will appear here*")
 
-        # Example topics
+        # ===== EXAMPLES =====
+        gr.Markdown("### 💡 Try these examples")
         gr.Examples(
             examples=[
-                ["Quantum Computing", f"{PERSONAS['5-Year-Old']['emoji']} 5-Year-Old"],
-                ["Blockchain", f"{PERSONAS['Gordon Ramsay']['emoji']} Gordon Ramsay"],
-                ["Black Holes", f"{PERSONAS['Pirate']['emoji']} Pirate"],
-                ["Machine Learning", f"{PERSONAS['Shakespeare']['emoji']} Shakespeare"],
-                ["Climate Change", f"{PERSONAS['Surfer Dude']['emoji']} Surfer Dude"],
-                ["The Force", f"{PERSONAS['Yoda']['emoji']} Yoda"],
+                ["Quantum Computing", "👶 5-Year-Old"],
+                ["Blockchain", "👨‍🍳 Gordon Ramsay"],
+                ["Black Holes", "🏴‍☠️ Pirate"],
+                ["Machine Learning", "🎭 Shakespeare"],
+                ["Climate Change", "🏄 Surfer Dude"],
+                ["The Force", "🧙 Yoda"],
             ],
             inputs=[topic_input, persona_dropdown],
-            label="Try these examples:",
+            label="",
         )
 
-        # MCP Info
+        # ===== MCP INFO =====
+        with gr.Accordion("🔌 MCP Server", open=False):
+            gr.Markdown(
+                """
+                This app is an **MCP Server**! Connect it to Claude Desktop or any MCP client:
+
+                ```
+                https://kaiser-data-mcp-1st-birthday-explainor.hf.space/gradio_api/mcp/sse
+                ```
+
+                **Available Tools:** `explain_topic`, `generate_audio`
+                """
+            )
+
+        # ===== FOOTER =====
         gr.Markdown(
             """
-            ---
-            ### 🔌 MCP Server Enabled!
-
-            This app is an **MCP Server**! Connect it to Claude Desktop or any MCP client:
-
-            ```
-            https://kaiser-data-mcp-1st-birthday-explainor.hf.space/gradio_api/mcp/sse
-            ```
-            """
+            <div style="text-align: center; padding: 1rem 0; opacity: 0.7; font-size: 0.85rem;">
+                <strong>MCP's 1st Birthday Hackathon</strong> · Track: MCP in Action (Creative)<br/>
+                Powered by <a href="https://nebius.com">Nebius AI</a> + <a href="https://elevenlabs.io">ElevenLabs</a> ·
+                Made with ❤️ by <strong>kaiser-data</strong>
+            </div>
+            """,
+            elem_classes=["footer"]
         )
 
-        # Footer
-        gr.Markdown(
-            """
-            ---
-            **Built for MCP's 1st Birthday Hackathon** | Track: MCP in Action (Creative)
-
-            Powered by: [Nebius AI](https://nebius.com) (LLM) + [ElevenLabs](https://elevenlabs.io) (TTS)
-
-            Made with ❤️ by **kaiser-data**
-            """
-        )
-
-        # Event handler for explanation
+        # ===== EVENT HANDLERS =====
         def process_and_explain(topic, persona_with_emoji, audience_with_emoji):
-            # Extract persona name (remove emoji prefix)
             persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
-            # Extract audience (remove emoji prefix), skip if "Just me"
             audience = ""
             if audience_with_emoji and "Just me" not in audience_with_emoji:
                 audience = audience_with_emoji.split(" ", 1)[1] if " " in audience_with_emoji else audience_with_emoji
             return explain_topic(topic, persona_name, audience)
 
+        def process_audio(explanation, persona_with_emoji):
+            persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
+            return generate_audio(explanation, persona_name)
+
+        # Explain button click
         explain_btn.click(
             fn=process_and_explain,
             inputs=[topic_input, persona_dropdown, audience_dropdown],
             outputs=[explanation_output, sources_output, steps_output, mcp_output],
         )
 
-        # Also trigger on Enter key in topic input
+        # Enter key in topic input
         topic_input.submit(
             fn=process_and_explain,
             inputs=[topic_input, persona_dropdown, audience_dropdown],
             outputs=[explanation_output, sources_output, steps_output, mcp_output],
         )
 
-        # Event handler for audio generation
-        def process_audio(explanation, persona_with_emoji):
-            # Extract persona name (remove emoji prefix)
-            persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
-            return generate_audio(explanation, persona_name)
-
+        # Read aloud button
         read_aloud_btn.click(
             fn=process_audio,
             inputs=[explanation_output, persona_dropdown],
@@ -337,7 +348,6 @@ def create_app():
 app = create_app()
 
 if __name__ == "__main__":
-    # MCP server enabled for Gradio 5+
     enable_mcp = os.getenv("ENABLE_MCP_SERVER", "true").lower() == "true"
 
     app.launch(
