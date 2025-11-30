@@ -162,7 +162,7 @@ def generate_audio(explanation: str, persona_name: str, progress=gr.Progress()):
 def create_app():
     """Create and configure the Gradio app."""
 
-    with gr.Blocks(title="Explainor - AI Persona Explanations", css=CUSTOM_CSS) as app:
+    with gr.Blocks(title="Explainor - AI Persona Explanations", theme=gr.themes.Soft()) as app:
         # Header
         gr.Markdown(
             """
