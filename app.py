@@ -32,7 +32,7 @@ def format_sources(sources: list[dict]) -> str:
     return md
 
 
-def explain_topic(topic: str, persona_name: str, progress=gr.Progress()):
+def explain_topic(topic: str, persona_name: str, audience: str = "", progress=gr.Progress()):
     """Main function to explain a topic in a persona's voice.
 
     Returns: (explanation_text, audio_path, sources_md, steps_md)
@@ -56,7 +56,7 @@ def explain_topic(topic: str, persona_name: str, progress=gr.Progress()):
     # Run the agent pipeline
     progress(0, desc="Starting...")
 
-    for update in run_agent(topic, persona_name):
+    for update in run_agent(topic, persona_name, audience):
         if update["type"] == "step":
             step_text = f"**{update['title']}**\n{update['content']}"
             steps_log.append(step_text)
@@ -139,6 +139,14 @@ def create_app():
                     label="🎭 Choose your explainer",
                 )
 
+        with gr.Row():
+            audience_input = gr.Textbox(
+                label="👤 Who are you? (optional)",
+                placeholder="e.g., a college student, a CEO, my grandmother, a 10-year-old...",
+                lines=1,
+                max_lines=1,
+            )
+
         explain_btn = gr.Button(
             "✨ Explain it to me!",
             variant="primary",
@@ -196,21 +204,21 @@ def create_app():
         )
 
         # Event handler
-        def process_and_explain(topic, persona_with_emoji):
+        def process_and_explain(topic, persona_with_emoji, audience):
             # Extract persona name (remove emoji prefix)
             persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
-            return explain_topic(topic, persona_name)
+            return explain_topic(topic, persona_name, audience)
 
         explain_btn.click(
             fn=process_and_explain,
-            inputs=[topic_input, persona_dropdown],
+            inputs=[topic_input, persona_dropdown, audience_input],
             outputs=[explanation_output, audio_output, sources_output, steps_output],
         )
 
         # Also trigger on Enter key in topic input
         topic_input.submit(
             fn=process_and_explain,
-            inputs=[topic_input, persona_dropdown],
+            inputs=[topic_input, persona_dropdown, audience_input],
             outputs=[explanation_output, audio_output, sources_output, steps_output],
         )
 

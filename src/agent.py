@@ -198,7 +198,7 @@ Now explain "{topic}" in your unique voice and style. Make it fun and educationa
     }
 
 
-def run_agent(topic: str, persona_name: str) -> Generator[dict, None, None]:
+def run_agent(topic: str, persona_name: str, audience: str = "") -> Generator[dict, None, None]:
     """Run the full agent pipeline.
 
     Yields progress updates and final results.
@@ -224,11 +224,16 @@ def run_agent(topic: str, persona_name: str) -> Generator[dict, None, None]:
     # Step 2: Generate explanation
     persona = get_persona(persona_name)
 
+    # Build audience context
+    audience_context = ""
+    if audience and audience.strip():
+        audience_context = f"\nYou are explaining this to: {audience.strip()}. Tailor your explanation appropriately for them."
+
     yield {
         "type": "step",
         "step": "generating",
         "title": f"{persona['emoji']} Channeling {persona_name}",
-        "content": "Transforming research into persona voice...",
+        "content": f"Transforming research into persona voice{' for ' + audience if audience else ''}...",
     }
 
     messages = [
@@ -241,7 +246,7 @@ You are explaining a topic to someone. Your explanation should be:
 2. Educational - actually explain the concept clearly
 3. About 150-200 words (suitable for text-to-speech)
 4. Natural spoken language (will be read aloud)
-5. Engaging and memorable
+5. Engaging and memorable{audience_context}
 
 Do NOT break character. Do NOT use markdown, bullet points, or special formatting.
 Just speak naturally as your character would.""",
