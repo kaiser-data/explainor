@@ -89,8 +89,7 @@ https://agents-mcp-hackathon-explainor.hf.space/gradio_api/mcp/sse
 - **Sponsor Integration**: ElevenLabs for text-to-speech
 
 ### 📹 Demo Video
-<!-- TODO: Add demo video link -->
-*Coming soon*
+[Watch Demo on Vimeo](https://vimeo.com/1141904708)
 
 ### 📱 Social Post
 [LinkedIn Post](https://www.linkedin.com/posts/activity-7401046415172444160-TDL7)
