@@ -144,7 +144,9 @@ def serve():
                           outputs=[explanation_output, sources_output, steps_output, mcp_output])
         read_aloud_btn.click(fn=process_audio, inputs=[explanation_output, persona_dropdown], outputs=[audio_output])
 
-    return demo.queue()
+    # Mount the Gradio app for proper static file serving
+    from gradio.routes import App
+    return App.create_app(demo)
 
 
 # For local testing
