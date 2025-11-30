@@ -18,6 +18,34 @@ from src.tts import generate_speech
 load_dotenv()
 
 
+# Custom CSS for dark mode input visibility
+CUSTOM_CSS = """
+/* Fix dark mode input visibility */
+input, textarea, select {
+    color: var(--body-text-color) !important;
+    background-color: var(--input-background-fill) !important;
+}
+
+input:hover, textarea:hover, select:hover,
+input:focus, textarea:focus, select:focus {
+    color: var(--body-text-color) !important;
+    background-color: var(--input-background-fill) !important;
+}
+
+/* Ensure placeholder is visible */
+input::placeholder, textarea::placeholder {
+    color: var(--body-text-color-subdued) !important;
+    opacity: 0.7;
+}
+
+/* Force dark background on inputs */
+.dark input, .dark textarea {
+    background-color: #374151 !important;
+    color: #ffffff !important;
+}
+"""
+
+
 def format_sources(sources: list[dict]) -> str:
     """Format sources as markdown."""
     if not sources:
@@ -134,7 +162,7 @@ def generate_audio(explanation: str, persona_name: str, progress=gr.Progress()):
 def create_app():
     """Create and configure the Gradio app."""
 
-    with gr.Blocks(title="Explainor - AI Persona Explanations") as app:
+    with gr.Blocks(title="Explainor - AI Persona Explanations", css=CUSTOM_CSS) as app:
         # Header
         gr.Markdown(
             """
@@ -293,26 +321,6 @@ def create_app():
 
 # Create the app
 app = create_app()
-
-CUSTOM_CSS = """
-/* Fix dark mode input visibility */
-input, textarea, select {
-    color: var(--body-text-color) !important;
-    background-color: var(--input-background-fill) !important;
-}
-
-input:hover, textarea:hover, select:hover,
-input:focus, textarea:focus, select:focus {
-    color: var(--body-text-color) !important;
-    background-color: var(--input-background-fill) !important;
-}
-
-/* Ensure placeholder is visible */
-input::placeholder, textarea::placeholder {
-    color: var(--body-text-color-subdued) !important;
-    opacity: 0.7;
-}
-"""
 
 if __name__ == "__main__":
     # MCP server enabled for Gradio 5+
