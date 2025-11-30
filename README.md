@@ -64,7 +64,7 @@ This app is a **real MCP Server**! You can connect it to Claude Desktop or any M
 
 **MCP Endpoint:**
 ```
-https://kaiser-data-mcp-1st-birthday-explainor.hf.space/gradio_api/mcp/sse
+https://agents-mcp-hackathon-explainor.hf.space/gradio_api/mcp/sse
 ```
 
 **Available Tools:**
@@ -84,8 +84,17 @@ https://kaiser-data-mcp-1st-birthday-explainor.hf.space/gradio_api/mcp/sse
 - **Event**: MCP's 1st Birthday Hackathon
 - **Track**: MCP in Action (Track 2)
 - **Category**: Creative
-- **Team**: kaiser-data
+- **Team/Author**: kaiser-data
+- **HF Username**: [kaiser-data](https://huggingface.co/kaiser-data)
 - **Sponsor Integration**: ElevenLabs for text-to-speech
+
+### 📹 Demo Video
+<!-- TODO: Add demo video link -->
+*Coming soon*
+
+### 📱 Social Post
+<!-- TODO: Add social media post link -->
+*Coming soon*
 
 ## 📝 License
 
