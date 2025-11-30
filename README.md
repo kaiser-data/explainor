@@ -31,18 +31,46 @@ Explainor is an AI agent that takes any topic you want to learn about and explai
 
 1. **Enter a topic** - Anything from "Quantum Computing" to "How do volcanoes work?"
 2. **Choose a persona** - Pick your favorite character
-3. **Watch the magic** - The AI agent:
+3. **Choose your audience** - Who are you explaining to?
+4. **Watch the magic** - The AI agent:
    - 🔍 Researches your topic using web search
-   - 🧠 Shows its reasoning process
-   - ✍️ Transforms the explanation into the character's voice
+   - 📋 Extracts key facts from sources
+   - 🎭 Transforms the explanation into the character's voice
    - 🔊 Reads it aloud with a matching voice!
+
+## 👤 Who's Listening?
+
+Make the explanation even more tailored by choosing your audience:
+
+| Audience | Effect |
+|----------|--------|
+| 👤 Just me | Standard explanation |
+| 👵 My confused grandmother | Extra simple, patient |
+| 🤖 A skeptical robot | Logical, evidence-based |
+| 👽 An alien visiting Earth | Explain Earth concepts |
+| 🧟 A zombie | Very short, simple words |
+| 🦊 A very smart fox | Clever, quick |
+| 👔 A stressed CEO | Bottom-line focused |
+| 🎮 A distracted gamer | Keep it engaging |
+
+## 🔌 MCP Server Integration
+
+This app is a **real MCP server**! When running, it exposes its functionality as tools that other AI agents can call via the Model Context Protocol.
+
+**MCP Endpoint:** `http://localhost:7860/gradio_api/mcp/`
+
+This means:
+- Other AI agents can use Explainor as a tool
+- Enables agent-to-agent communication
+- Part of the growing MCP ecosystem
 
 ## 🚀 Tech Stack
 
+- **MCP**: Model Context Protocol - App exposes itself as an MCP server
 - **LLM**: [Nebius AI](https://nebius.com) - Llama 3.3 70B for intelligent explanations
 - **TTS**: [ElevenLabs](https://elevenlabs.io) - Realistic voice synthesis with character-matched voices
 - **Web Search**: DuckDuckGo API for topic research
-- **Frontend**: [Gradio](https://gradio.app) - Beautiful, responsive UI
+- **Frontend**: [Gradio](https://gradio.app) with MCP integration
 - **Deployment**: [Modal](https://modal.com) - Serverless infrastructure
 
 ## 💻 Local Development

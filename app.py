@@ -301,4 +301,5 @@ if __name__ == "__main__":
         server_port=7860,
         share=False,
         css=CUSTOM_CSS,
+        mcp_server=True,  # Enable MCP server - exposes this app as an MCP tool!
     )
