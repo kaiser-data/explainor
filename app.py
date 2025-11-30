@@ -161,11 +161,21 @@ def create_app():
                 )
 
         with gr.Row():
-            audience_input = gr.Textbox(
-                label="👤 Who are you? (optional)",
-                placeholder="e.g., a college student, a CEO, my grandmother, a 10-year-old...",
-                lines=1,
-                max_lines=1,
+            # Funny listener options (don't overlap with personas)
+            listener_choices = [
+                "👤 Just me",
+                "👵 My confused grandmother",
+                "🤖 A skeptical robot",
+                "👽 An alien visiting Earth",
+                "🧟 A zombie (short attention span)",
+                "🦊 A very smart fox",
+                "👔 A stressed CEO",
+                "🎮 A distracted gamer",
+            ]
+            audience_dropdown = gr.Dropdown(
+                choices=listener_choices,
+                value=listener_choices[0],
+                label="👤 Who's listening?",
             )
 
         explain_btn = gr.Button(
@@ -234,21 +244,25 @@ def create_app():
         )
 
         # Event handler
-        def process_and_explain(topic, persona_with_emoji, gen_audio, audience):
+        def process_and_explain(topic, persona_with_emoji, gen_audio, audience_with_emoji):
             # Extract persona name (remove emoji prefix)
             persona_name = persona_with_emoji.split(" ", 1)[1] if " " in persona_with_emoji else persona_with_emoji
+            # Extract audience (remove emoji prefix), skip if "Just me"
+            audience = ""
+            if audience_with_emoji and "Just me" not in audience_with_emoji:
+                audience = audience_with_emoji.split(" ", 1)[1] if " " in audience_with_emoji else audience_with_emoji
             return explain_topic(topic, persona_name, audience, gen_audio)
 
         explain_btn.click(
             fn=process_and_explain,
-            inputs=[topic_input, persona_dropdown, audio_checkbox, audience_input],
+            inputs=[topic_input, persona_dropdown, audio_checkbox, audience_dropdown],
             outputs=[explanation_output, audio_output, sources_output, steps_output, mcp_output],
         )
 
         # Also trigger on Enter key in topic input
         topic_input.submit(
             fn=process_and_explain,
-            inputs=[topic_input, persona_dropdown, audio_checkbox, audience_input],
+            inputs=[topic_input, persona_dropdown, audio_checkbox, audience_dropdown],
             outputs=[explanation_output, audio_output, sources_output, steps_output, mcp_output],
         )
 
