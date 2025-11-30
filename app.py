@@ -269,6 +269,20 @@ def create_app():
             label="Try these examples:",
         )
 
+        # MCP Info
+        gr.Markdown(
+            """
+            ---
+            ### 🔌 MCP Server Enabled!
+
+            This app is an **MCP Server**! Connect it to Claude Desktop or any MCP client:
+
+            ```
+            https://kaiser-data-mcp-1st-birthday-explainor.hf.space/gradio_api/mcp/sse
+            ```
+            """
+        )
+
         # Footer
         gr.Markdown(
             """

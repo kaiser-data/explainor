@@ -56,12 +56,26 @@ Make the explanation even more tailored by choosing your audience:
 | 🤖 A skeptical robot | Logical, evidence-based |
 | 👽 An alien visiting Earth | Explain Earth concepts |
 
+## 🔌 MCP Server Integration
+
+This app is a **real MCP Server**! You can connect it to Claude Desktop or any MCP-compatible client.
+
+**MCP Endpoint:**
+```
+https://kaiser-data-mcp-1st-birthday-explainor.hf.space/gradio_api/mcp/sse
+```
+
+**Available Tools:**
+- `explain_topic` - Get explanations in character voices
+- `generate_audio` - Generate TTS audio from explanations
+
 ## 🚀 Tech Stack
 
+- **MCP**: Model Context Protocol - App exposes itself as an MCP server via Gradio
 - **LLM**: [Nebius AI](https://nebius.com) - Llama 3.3 70B for intelligent explanations
 - **TTS**: [ElevenLabs](https://elevenlabs.io) - Realistic voice synthesis with character-matched voices
 - **Web Search**: DuckDuckGo API for topic research
-- **Frontend**: [Gradio](https://gradio.app) with MCP integration
+- **Frontend**: [Gradio](https://gradio.app) with native MCP integration
 
 ## 🏆 Hackathon Submission
 
