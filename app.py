@@ -195,7 +195,7 @@ def create_app():
 
         with gr.Row():
             with gr.Column():
-                with gr.Accordion("🔌 MCP Tools Used", open=True):
+                with gr.Accordion("🔌 Tools & Services Used", open=True):
                     mcp_output = gr.Markdown("")
 
         with gr.Row():
