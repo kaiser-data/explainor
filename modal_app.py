@@ -44,7 +44,10 @@ def serve():
     os.environ["ENABLE_MCP_SERVER"] = "false"
     os.chdir("/app")
 
-    # Start Gradio app as subprocess
+    # Pass environment variables to subprocess
+    env = os.environ.copy()
+
+    # Start Gradio app as subprocess with inherited env
     subprocess.Popen(["python", "-c", """
 import sys
 sys.path.insert(0, '/app')
@@ -131,7 +134,7 @@ with gr.Blocks(title="Explainor") as demo:
     read_aloud_btn.click(fn=generate_audio, inputs=[explanation_output, persona_dropdown], outputs=[audio_output])
 
 demo.launch(server_name="0.0.0.0", server_port=7860)
-"""])
+"""], env=env)
 
 
 # For local testing
