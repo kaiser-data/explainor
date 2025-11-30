@@ -263,6 +263,12 @@ Now explain "{topic}" in your unique {persona_name} voice and style. Make it fun
 
     explanation = call_llm(messages)
 
+    # Track MCP tools used
+    mcp_tools = [
+        {"name": "DuckDuckGo Search", "icon": "🔍", "desc": "Web search for topic research"},
+        {"name": "Nebius LLM", "icon": "🧠", "desc": "Llama 3.3 70B for persona transformation"},
+    ]
+
     yield {
         "type": "result",
         "explanation": explanation,
@@ -270,4 +276,5 @@ Now explain "{topic}" in your unique {persona_name} voice and style. Make it fun
         "persona": persona_name,
         "persona_emoji": persona["emoji"],
         "voice_id": persona["voice_id"],
+        "mcp_tools": mcp_tools,
     }

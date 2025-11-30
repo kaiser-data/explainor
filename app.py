@@ -32,10 +32,21 @@ def format_sources(sources: list[dict]) -> str:
     return md
 
 
+def format_mcp_tools(tools: list[dict]) -> str:
+    """Format MCP tools used as markdown."""
+    if not tools:
+        return "*No tools used*"
+
+    md = "**Tools & Services Used:**\n\n"
+    for tool in tools:
+        md += f"{tool['icon']} **{tool['name']}** - {tool['desc']}\n\n"
+    return md
+
+
 def explain_topic(topic: str, persona_name: str, audience: str = "", generate_audio: bool = False, progress=gr.Progress()):
     """Main function to explain a topic in a persona's voice.
 
-    Returns: (explanation_text, audio_path, sources_md, steps_md)
+    Returns: (explanation_text, audio_path, sources_md, steps_md, mcp_md)
     """
     if not topic.strip():
         return (
@@ -43,6 +54,7 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
             None,
             "",
             "❌ No topic provided",
+            "",
         )
 
     if not persona_name:
@@ -52,6 +64,7 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
     explanation = ""
     sources = []
     voice_id = None
+    mcp_tools = []
 
     # Run the agent pipeline
     progress(0, desc="Starting...")
@@ -74,6 +87,7 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
             explanation = update["explanation"]
             sources = update.get("sources", sources)
             voice_id = update["voice_id"]
+            mcp_tools = update.get("mcp_tools", [])
             progress(0.8, desc="Explanation ready!")
 
     # Format the steps log
@@ -89,6 +103,8 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
             with tempfile.NamedTemporaryFile(suffix=".mp3", delete=False) as f:
                 f.write(audio_bytes)
                 audio_path = f.name
+            # Add ElevenLabs to MCP tools
+            mcp_tools.append({"name": "ElevenLabs TTS", "icon": "🔊", "desc": "Text-to-speech audio generation"})
             progress(1.0, desc="Done!")
         except Exception as e:
             steps_log.append(f"**⚠️ Audio generation failed**\n{str(e)}")
@@ -100,7 +116,10 @@ def explain_topic(topic: str, persona_name: str, audience: str = "", generate_au
     # Format sources
     sources_md = format_sources(sources)
 
-    return explanation, audio_path, sources_md, steps_md
+    # Format MCP tools
+    mcp_md = format_mcp_tools(mcp_tools)
+
+    return explanation, audio_path, sources_md, steps_md, mcp_md
 
 
 # Build the Gradio interface
@@ -176,6 +195,11 @@ def create_app():
 
         with gr.Row():
             with gr.Column():
+                with gr.Accordion("🔌 MCP Tools Used", open=True):
+                    mcp_output = gr.Markdown("")
+
+        with gr.Row():
+            with gr.Column():
                 with gr.Accordion("🔍 Sources", open=False):
                     sources_output = gr.Markdown("")
 
@@ -218,14 +242,14 @@ def create_app():
         explain_btn.click(
             fn=process_and_explain,
             inputs=[topic_input, persona_dropdown, audio_checkbox, audience_input],
-            outputs=[explanation_output, audio_output, sources_output, steps_output],
+            outputs=[explanation_output, audio_output, sources_output, steps_output, mcp_output],
         )
 
         # Also trigger on Enter key in topic input
         topic_input.submit(
             fn=process_and_explain,
             inputs=[topic_input, persona_dropdown, audio_checkbox, audience_input],
-            outputs=[explanation_output, audio_output, sources_output, steps_output],
+            outputs=[explanation_output, audio_output, sources_output, steps_output, mcp_output],
         )
 
     return app
